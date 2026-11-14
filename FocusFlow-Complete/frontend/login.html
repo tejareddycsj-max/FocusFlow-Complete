@@ -1,0 +1,257 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFlow – Login</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 430px;
+        }
+
+        .auth-brand {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .auth-brand .brand-mark {
+            display: grid;
+            place-items: center;
+            width: 52px;
+            height: 52px;
+            margin: 0 auto 12px;
+            border-radius: 14px;
+            background: var(--gold);
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .auth-brand h1 {
+            font: 700 1.8rem 'Inter', sans-serif;
+        }
+
+        .auth-brand p {
+            color: var(--muted);
+            font-size: .85rem;
+            margin-top: 5px;
+        }
+
+        .auth-card {
+            padding: 30px;
+        }
+
+        .auth-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+        }
+
+        .auth-subtitle {
+            color: var(--muted);
+            font-size: .82rem;
+            margin-bottom: 24px;
+        }
+
+        .auth-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 5px;
+            margin-bottom: 24px;
+            background: var(--bg-main);
+            border-radius: 9px;
+        }
+
+        .auth-tab {
+            padding: 10px;
+            border: 0;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: .82rem;
+        }
+
+        .auth-tab.active {
+            background: var(--card);
+            color: var(--gold-dark);
+            box-shadow: var(--shadow);
+        }
+
+        .auth-form .form-group {
+            margin-bottom: 17px;
+        }
+
+        .auth-form input {
+            padding: 12px;
+        }
+
+        .auth-submit {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .auth-message {
+            display: none;
+            padding: 11px;
+            margin-bottom: 16px;
+            border-radius: 7px;
+            font-size: .78rem;
+        }
+
+        .auth-message.error {
+            display: block;
+            color: #a64e42;
+            background: rgba(198, 91, 87, .12);
+        }
+
+        .auth-message.success {
+            display: block;
+            color: #475569;
+            background: rgba(100, 116, 139, .14);
+        }
+
+        .auth-footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: .72rem;
+            margin-top: 22px;
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="auth-container">
+
+        <div class="auth-brand">
+            <div class="brand-mark">
+                <i class="ri-focus-3-line"></i>
+            </div>
+            <h1>FocusFlow</h1>
+            <p>Your intelligent study companion</p>
+        </div>
+
+        <section class="card auth-card">
+
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab active" id="loginTab">
+                    Login
+                </button>
+
+                <button type="button" class="auth-tab" id="registerTab">
+                    Register
+                </button>
+            </div>
+
+            <div id="authMessage" class="auth-message"></div>
+
+            <form id="loginForm" class="auth-form">
+
+                <h2>Welcome back</h2>
+                <p class="auth-subtitle">Log in to continue your progress.</p>
+
+                <div class="form-group">
+                    <label for="loginEmail">Email address</label>
+                    <input
+                        type="email"
+                        id="loginEmail"
+                        placeholder="you@example.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input
+                        type="password"
+                        id="loginPassword"
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary auth-submit">
+                    Login to FocusFlow
+                </button>
+
+            </form>
+
+            <form id="registerForm">
+
+                <h2>Create an account</h2>
+                <p class="auth-subtitle">Start building better study habits.</p>
+
+                <div class="form-group">
+                    <label for="registerName">Full name</label>
+                    <input
+                        type="text"
+                        id="registerName"
+                        placeholder="Your name"
+                        minlength="2"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="registerEmail">Email address</label>
+                    <input
+                        type="email"
+                        id="registerEmail"
+                        placeholder="you@example.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input
+                        type="password"
+                        id="registerPassword"
+                        placeholder="At least 8 characters"
+                        minlength="8"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary auth-submit">
+                    Create Account
+                </button>
+
+            </form>
+
+        </section>
+
+        <p class="auth-footer">
+            FocusFlow · Intelligent Study Planning and Productivity System
+        </p>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css"></script>
+    <script src="auth.js"></script>
+
+</body>
+</html>

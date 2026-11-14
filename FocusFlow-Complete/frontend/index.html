@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FocusFlow — Study with purpose</title>
+  <meta name="theme-color" content="#18181B">
+  <meta name="description" content="FocusFlow helps students plan study sessions, track progress, and get personalized study guidance.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <!-- Login and registration have been removed. The application opens directly. -->
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark"><i class="ri-book-mark-line"></i></span>
+        <div><h2>FocusFlow</h2><small>Study with purpose</small></div>
+      </div>
+
+      <div class="profile-header-widget">
+        <img id="sidebarAvatar" class="sidebar-avatar" src="https://ui-avatars.com/api/?name=Student&background=B99A5B&color=fff" alt="Student profile">
+        <div class="user-meta">
+          <h4 id="sidebarUserName">Student Name</h4>
+          <p id="sidebarUserRole">Student</p>
+        </div>
+      </div>
+
+      <nav class="nav-menu" aria-label="Main navigation">
+        <a href="#dashboardSection" class="nav-item active" data-target="dashboardSection"><i class="ri-dashboard-3-line"></i><span>Dashboard</span></a>
+        <a href="#timerSection" class="nav-item" data-target="timerSection"><i class="ri-timer-flash-line"></i><span>Focus Timer</span></a>
+        <a href="#plannerSection" class="nav-item" data-target="plannerSection"><i class="ri-calendar-event-line"></i><span>Study Planner</span></a>
+        <a href="#tasksSection" class="nav-item" data-target="tasksSection"><i class="ri-task-line"></i><span>My Tasks</span></a>
+        <a href="#analyticsSection" class="nav-item" data-target="analyticsSection"><i class="ri-bar-chart-box-line"></i><span>Learning Analytics</span></a>
+        <a href="#achievementsSection" class="nav-item" data-target="achievementsSection"><i class="ri-medal-line"></i><span>Achievements</span></a>
+        <a href="#assistantSection" class="nav-item" data-target="assistantSection"><i class="ri-robot-2-line"></i><span>AI Assistant</span></a>
+        <a href="#profileSection" class="nav-item" data-target="profileSection"><i class="ri-user-settings-line"></i><span>My Profile</span></a>
+        <a href="#settingsSection" class="nav-item" data-target="settingsSection"><i class="ri-settings-3-line"></i><span>Settings</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+  <div class="sidebar-tip">
+    <i class="ri-lightbulb-line"></i>
+    <span>Small steps every day lead to big results.</span>
+  </div>
+
+  <button
+    type="button"
+    class="btn btn-secondary"
+    onclick="logout()"
+    style="width: 100%; margin-top: 12px;"
+  >
+    <i class="ri-logout-box-r-line"></i> Log out
+  </button>
+
+  <p>FocusFlow · Student Workspace</p>
+</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="top-bar">
+        <div>
+          <p class="eyebrow">YOUR PERSONAL STUDY SPACE</p>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p class="quote-container" id="dailyQuote">“Deep work is the superpower of the 21st century.”</p>
+        </div>
+        <div class="top-bar-actions">
+          <div class="streak-pill"><i class="ri-fire-fill"></i><strong id="streakCountHeader">5</strong><span>day streak</span></div>
+          <button class="btn btn-secondary export-top-btn" type="button" onclick="exportProductivityReport()"><i class="ri-download-2-line"></i> Report CSV</button>
+          <button class="icon-button theme-toggle" id="themeToggleBtn" type="button" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode"><i class="ri-moon-line"></i></button>
+          <button class="icon-button" type="button" onclick="showNotification('You are all caught up!')" title="Notifications" aria-label="Notifications"><i class="ri-notification-3-line"></i></button>
+        </div>
+      </header>
+
+      <!-- DASHBOARD -->
+      <section id="dashboardSection" class="content-section active">
+        <div class="welcome-row">
+          <div><h2>Welcome back, <span id="welcomeName">Student</span>!</h2><p>Here is your study progress at a glance.</p></div>
+          <span class="date-chip" id="todayDate"></span>
+        </div>
+
+        <div class="metrics-grid">
+          <article class="card metric-card"><div class="metric-header"><span>Daily Productivity</span><i class="ri-pulse-line"></i></div><h3 id="dailyScore">0%</h3><div class="progress-bar"><div class="progress-fill" id="dailyScoreBar" style="width:0%"></div></div><small>Based on today's completed tasks</small></article>
+          <article class="card metric-card"><div class="metric-header"><span>Weekly Score</span><i class="ri-line-chart-line"></i></div><h3 id="weeklyScore">0%</h3><div class="progress-bar"><div class="progress-fill sage-fill" id="weeklyScoreBar" style="width:0%"></div></div><small>Weekly task completion</small></article>
+          <article class="card metric-card"><div class="metric-header"><span>Total Study Hours</span><i class="ri-time-line"></i></div><h3 id="totalStudyHours">0.0 hrs</h3><small>Recorded focus sessions</small></article>
+          <article class="card metric-card"><div class="metric-header"><span>Completed Tasks</span><i class="ri-checkbox-circle-line"></i></div><h3 id="completedTasksCount">0</h3><small id="pendingTasksCount">0 tasks pending</small></article>
+        </div>
+
+        <div class="dashboard-grid charts-grid">
+          <article class="card"><div class="card-heading"><div><p class="eyebrow">PERFORMANCE</p><h3>Study Time Comparison (Daily vs Target)</h3></div><span class="heading-icon"><i class="ri-pulse-line"></i></span></div><div class="chart-container"><canvas id="productivityTrendChart"></canvas></div></article>
+          <article class="card"><div class="card-heading"><div><p class="eyebrow">SUBJECT BREAKDOWN</p><h3>Subject-Wise Time Distribution</h3></div><span class="heading-icon"><i class="ri-pie-chart-line"></i></span></div><div class="chart-container"><canvas id="subjectPerformanceChart"></canvas></div></article>
+        </div>
+
+        <div class="dashboard-grid bottom-grid">
+          <article class="card"><div class="card-heading"><div><p class="eyebrow">YOUR SCHEDULE</p><h3>Today's Study Plan</h3></div><button class="text-button" onclick="showSection('plannerSection')">View planner <i class="ri-arrow-right-line"></i></button></div><div id="todayPlanList" class="today-plan-list"></div></article>
+          <article class="card"><div class="card-heading"><div><p class="eyebrow">DAILY TARGET</p><h3>Study Goal Progress</h3></div><span class="heading-icon"><i class="ri-target-line"></i></span></div><div class="goal-number"><strong id="todayStudyHours">0.0</strong><span>/ <span id="dailyGoalLabel">4</span> hours</span></div><div class="progress-bar goal-progress"><div class="progress-fill" id="dailyGoalBar" style="width:0%"></div></div><p class="muted-text" id="dailyGoalMessage">Start a focus session to make progress toward your goal.</p></article>
+        </div>
+      </section>
+
+      <!-- FOCUS TIMER -->
+      <section id="timerSection" class="content-section hidden">
+        <div class="section-intro"><p class="eyebrow">STAY PRESENT</p><h2>Focus Timer</h2><p>Work in focused intervals and take regular breaks.</p></div>
+        <div class="card timer-layout">
+          <div class="timer-modes">
+            <button class="mode-btn active" data-mode="pomodoro" onclick="setTimerMode('pomodoro',25,this)">Focus · 25 min</button>
+            <button class="mode-btn" data-mode="shortBreak" onclick="setTimerMode('shortBreak',5,this)">Short break · 5 min</button>
+            <button class="mode-btn" data-mode="longBreak" onclick="setTimerMode('longBreak',15,this)">Long break · 15 min</button>
+          </div>
+          <label class="timer-subject-label" for="timerSubjectInput">What are you working on?</label>
+          <input id="timerSubjectInput" class="timer-subject-input" type="text" value="Study session" maxlength="70" oninput="updateTimerSubject()">
+          <div class="timer-display-container">
+            <svg class="timer-ring" viewBox="0 0 300 300" aria-hidden="true"><circle class="timer-ring-circle-bg" cx="150" cy="150" r="135"></circle><circle id="timerProgressRing" class="timer-ring-circle" cx="150" cy="150" r="135"></circle></svg>
+            <div class="timer-text-overlay"><h1 id="timerDisplay">25:00</h1><span id="timerStatus">Ready to focus</span></div>
+          </div>
+          <div class="timer-controls"><button id="startTimerBtn" class="btn btn-primary btn-lg" onclick="startTimer()"><i class="ri-play-fill"></i> Start Focus</button><button id="pauseTimerBtn" class="btn btn-secondary btn-lg hidden" onclick="pauseTimer()"><i class="ri-pause-fill"></i> Pause</button><button class="btn btn-outline btn-lg" onclick="resetTimer()"><i class="ri-refresh-line"></i> Reset</button></div>
+          <div class="timer-settings"><div><label for="customStudyMin">Focus duration (minutes)</label><input id="customStudyMin" type="number" min="1" max="120" value="25"></div><div><label for="customBreakMin">Break duration (minutes)</label><input id="customBreakMin" type="number" min="1" max="60" value="5"></div><button class="btn btn-secondary" onclick="applyCustomTimer()">Apply settings</button></div>
+        </div>
+        <article class="card history-card"><div class="card-heading"><div><p class="eyebrow">YOUR ACTIVITY</p><h3>Focus Session History</h3></div></div><div class="table-responsive"><table class="data-table"><thead><tr><th>Subject</th><th>Duration</th><th>Completed at</th><th>Mode</th></tr></thead><tbody id="timerHistoryTableBody"><tr><td colspan="4" class="empty-cell">No completed sessions yet.</td></tr></tbody></table></div></article>
+      </section>
+
+      <!-- STUDY PLANNER -->
+      <section id="plannerSection" class="content-section hidden">
+        <div class="section-heading-row"><div class="section-intro"><p class="eyebrow">PLAN YOUR WEEK</p><h2>Study Planner</h2><p>Organize your subjects and topics across the week.</p></div><button class="btn btn-primary" onclick="openTaskModal()"><i class="ri-add-line"></i> Schedule a topic</button></div>
+        <div class="weekly-planner-grid">
+          <div class="day-column"><div class="day-header">Monday</div><div class="day-tasks" id="day-mon"></div></div>
+          <div class="day-column"><div class="day-header">Tuesday</div><div class="day-tasks" id="day-tue"></div></div>
+          <div class="day-column"><div class="day-header">Wednesday</div><div class="day-tasks" id="day-wed"></div></div>
+          <div class="day-column"><div class="day-header">Thursday</div><div class="day-tasks" id="day-thu"></div></div>
+          <div class="day-column"><div class="day-header">Friday</div><div class="day-tasks" id="day-fri"></div></div>
+          <div class="day-column"><div class="day-header">Saturday</div><div class="day-tasks" id="day-sat"></div></div>
+          <div class="day-column"><div class="day-header">Sunday</div><div class="day-tasks" id="day-sun"></div></div>
+        </div>
+      </section>
+
+      <!-- MY TASKS -->
+      <section id="tasksSection" class="content-section hidden">
+        <div class="section-heading-row"><div class="section-intro"><p class="eyebrow">STAY ORGANIZED</p><h2>My Tasks</h2><p>Create tasks, set priorities and track completion.</p></div><button class="btn btn-primary" onclick="openTaskModal()"><i class="ri-add-line"></i> Add new task</button></div>
+        <div class="task-filters"><button class="filter-btn active" onclick="filterTasks('all',this)">All tasks</button><button class="filter-btn" onclick="filterTasks('high',this)">High priority</button><button class="filter-btn" onclick="filterTasks('pending',this)">Pending</button><button class="filter-btn" onclick="filterTasks('completed',this)">Completed</button></div>
+        <div id="tasksListContainer" class="task-list"></div>
+      </section>
+
+      <!-- LEARNING ANALYTICS -->
+      <section id="analyticsSection" class="content-section hidden">
+        <div class="section-intro"><p class="eyebrow">UNDERSTAND YOUR LEARNING</p><h2>Learning Analytics</h2><p>Review your study patterns and topic confidence.</p></div>
+        <div class="analytics-grid"><article class="card"><div class="card-heading"><h3 class="sage-text"><i class="ri-checkbox-circle-fill"></i> Strong Topics (4–5/5)</h3></div><ul class="topic-list" id="strongTopicsList"></ul></article><article class="card"><div class="card-heading"><h3 class="danger-text"><i class="ri-alert-fill"></i> Topics to Revise (1–2/5)</h3></div><ul class="topic-list" id="weakTopicsList"></ul></article></div>
+        <article class="card analytics-chart-card"><div class="card-heading"><div><p class="eyebrow">TIME MANAGEMENT</p><h3>Planned vs. Actual Study Hours</h3></div></div><div class="chart-container"><canvas id="plannedVsActualChart"></canvas></div></article>
+      </section>
+
+      <!-- ACHIEVEMENTS -->
+      <section id="achievementsSection" class="content-section hidden">
+        <div class="section-intro"><p class="eyebrow">CELEBRATE YOUR PROGRESS</p><h2>Achievements</h2><p>Build consistency and recognize your milestones.</p></div>
+        <article class="card gamification-banner"><div><p class="eyebrow">YOUR LEARNING LEVEL</p><h2 id="userLevelDisplay">Level 1 Scholar</h2><p><strong id="userXpDisplay">0</strong> / 1000 XP to next level</p><div class="progress-bar"><div class="progress-fill" id="xpProgressBar" style="width:0%"></div></div></div><div class="streak-large"><i class="ri-fire-fill"></i><strong id="currentStreakDisplay">0 Days</strong><span>Current streak</span></div></article>
+        <div class="card badges-card"><div class="card-heading"><h3>Achievement badges</h3></div><div class="badges-grid" id="badgesGrid"></div></div>
+      </section>
+
+      <!-- AI STUDY ASSISTANT -->
+      <section id="assistantSection" class="content-section hidden">
+        <div class="section-heading-row assistant-heading-row">
+          <div class="section-intro">
+            <p class="eyebrow">PERSONALIZED STUDY GUIDANCE</p>
+            <h2>AI Study Assistant</h2>
+            <p>Ask for a study plan, revise difficult topics, or decide what to focus on next.</p>
+          </div>
+          <div class="assistant-connection-pill" id="assistantConnectionPill">
+            <span class="connection-dot"></span>
+            <span id="assistantConnectionText">Checking connection…</span>
+          </div>
+        </div>
+
+        <div class="assistant-layout">
+          <article class="card assistant-chat-card">
+            <div class="assistant-chat-header">
+              <div class="assistant-identity">
+                <div class="assistant-avatar"><i class="ri-sparkling-2-fill"></i></div>
+                <div>
+                  <h3>FocusFlow Assistant</h3>
+                  <p>Your personal academic study coach</p>
+                </div>
+              </div>
+              <span class="assistant-role-pill"><i class="ri-graduation-cap-line"></i> Study coach</span>
+            </div>
+
+            <div class="assistant-context-row">
+              <span><i class="ri-check-double-line"></i> Study tasks</span>
+              <span><i class="ri-bar-chart-line"></i> Progress</span>
+              <span><i class="ri-book-open-line"></i> Topic confidence</span>
+            </div>
+
+            <div class="chat-messages" id="chatMessages" aria-live="polite" aria-label="Chat conversation">
+              <div class="chat-message assistant-message">
+                <div class="message-avatar"><i class="ri-sparkling-2-fill"></i></div>
+                <div class="message-bubble">Hello! I’m your FocusFlow study assistant. I can help you prioritize tasks, plan focused study sessions, and identify topics that need revision. What would you like to work on today?</div>
+              </div>
+            </div>
+
+            <div class="assistant-suggestions" aria-label="Suggested questions">
+              <button type="button" class="suggestion-chip" onclick="useAssistantPrompt('What should I study next based on my pending tasks?')">What should I study next?</button>
+              <button type="button" class="suggestion-chip" onclick="useAssistantPrompt('Help me make a study plan for today.')">Plan my day</button>
+              <button type="button" class="suggestion-chip" onclick="useAssistantPrompt('Which topics should I revise first?')">Find weak topics</button>
+            </div>
+
+            <form class="assistant-composer" id="assistantForm">
+              <textarea id="assistantInput" rows="1" maxlength="1200" placeholder="Ask FocusFlow anything about your study plan…" aria-label="Message the FocusFlow assistant" required></textarea>
+              <button type="submit" id="assistantSendBtn" class="assistant-send-btn" aria-label="Send message"><i class="ri-send-plane-2-fill"></i></button>
+            </form>
+            <p class="assistant-footnote"><i class="ri-lock-line"></i> Your chat is used to provide study guidance within this app.</p>
+          </article>
+
+          <aside class="assistant-side-column">
+            <article class="card assistant-snapshot-card">
+              <div class="card-heading">
+                <div><p class="eyebrow">YOUR CURRENT PROGRESS</p><h3>Study snapshot</h3></div>
+                <span class="heading-icon"><i class="ri-line-chart-line"></i></span>
+              </div>
+              <div class="assistant-stat-grid">
+                <div class="assistant-stat"><strong id="assistantPendingCount">0</strong><span>Pending tasks</span></div>
+                <div class="assistant-stat"><strong id="assistantWeakCount">0</strong><span>Topics to revise</span></div>
+                <div class="assistant-stat"><strong id="assistantFocusHours">0.0h</strong><span>Focused today</span></div>
+                <div class="assistant-stat"><strong id="assistantCompletedCount">0</strong><span>Completed tasks</span></div>
+              </div>
+            </article>
+
+            <article class="card assistant-next-card">
+              <p class="eyebrow">RECOMMENDED NEXT STEP</p>
+              <div class="recommendation-icon"><i class="ri-lightbulb-flash-line"></i></div>
+              <h3 id="assistantNextTitle">Start with one focused session</h3>
+              <p id="assistantNextText">Add study tasks and rate your topic confidence to receive more relevant recommendations.</p>
+              <button type="button" class="text-button" onclick="useAssistantPrompt('Recommend my next study session using my current progress.')">Ask assistant <i class="ri-arrow-right-line"></i></button>
+            </article>
+
+            <article class="card assistant-tip-card">
+              <div class="tip-icon"><i class="ri-focus-3-line"></i></div>
+              <div><h3>Small steps matter</h3><p>Try one 25-minute focus session, then take a short break. Consistency is more useful than a perfect timetable.</p></div>
+            </article>
+          </aside>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section id="profileSection" class="content-section hidden">
+        <div class="section-intro"><p class="eyebrow">YOUR ACCOUNT DETAILS</p><h2>My Profile</h2><p>Update your student information and daily study goal.</p></div>
+        <form id="profileForm" class="card profile-form">
+          <div class="profile-form-grid"><div class="form-group"><label for="profileName">Full name</label><input id="profileName" type="text" required></div><div class="form-group"><label for="profileEmail">Email address</label><input id="profileEmail" type="email" required></div><div class="form-group"><label for="profileDepartment">Course / Department</label><input id="profileDepartment" type="text" placeholder="Computer Science Engineering"></div><div class="form-group"><label for="profileYear">Academic year</label><select id="profileYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></div><div class="form-group"><label for="dailyGoalInput">Daily study goal (hours)</label><input id="dailyGoalInput" type="number" min="1" max="16" value="4"></div></div>
+          <button class="btn btn-primary" type="submit"><i class="ri-save-line"></i> Save profile</button>
+        </form>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settingsSection" class="content-section hidden">
+        <div class="section-intro"><p class="eyebrow">MAKE FOCUSFLOW YOURS</p><h2>Settings</h2><p>Manage the appearance and your study data.</p></div>
+        <article class="card setting-row"><div><h3>Appearance</h3><p class="muted-text">Switch between light and dark themes.</p></div><button class="btn btn-secondary" onclick="toggleTheme()">Toggle theme</button></article>
+        <article class="card setting-row"><div><h3>Export productivity data</h3><p class="muted-text">Download your tasks and focus-session history as a CSV file.</p></div><button class="btn btn-primary" onclick="exportProductivityReport()"><i class="ri-download-2-line"></i> Export CSV</button></article>
+        <article class="card setting-row"><div><h3>Reset sample data</h3><p class="muted-text">Restore the original demonstration tasks and progress.</p></div><button class="btn btn-outline-danger" onclick="resetSampleData()">Reset data</button></article>
+      </section>
+
+      <footer class="app-footer">FocusFlow · Plan better. Focus better. Learn better.</footer>
+    </main>
+  </div>
+
+  <!-- ADD / EDIT TASK MODAL -->
+  <div class="modal-overlay hidden" id="taskModal" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
+    <form class="modal-card" id="taskForm">
+      <div class="modal-header"><div><p class="eyebrow">STUDY PLANNING</p><h2 id="taskModalTitle">Add a study task</h2></div><button type="button" class="modal-close" onclick="closeTaskModal()" aria-label="Close">&times;</button></div>
+      <div class="form-group"><label for="taskTitleInput">Topic / Task name</label><input id="taskTitleInput" type="text" placeholder="e.g. Linked Lists" required maxlength="100"></div>
+      <div class="form-group"><label for="taskSubjectInput">Subject</label><input id="taskSubjectInput" type="text" placeholder="e.g. Data Structures" required maxlength="60"></div>
+      <div class="form-grid"><div class="form-group"><label for="taskPriorityInput">Priority</label><select id="taskPriorityInput"><option>High</option><option selected>Medium</option><option>Low</option></select></div><div class="form-group"><label for="taskDurationInput">Planned duration (min)</label><input id="taskDurationInput" type="number" min="5" max="600" value="45" required></div></div>
+      <div class="form-grid"><div class="form-group"><label for="taskDayInput">Day</label><select id="taskDayInput"><option value="mon">Monday</option><option value="tue">Tuesday</option><option value="wed">Wednesday</option><option value="thu">Thursday</option><option value="fri">Friday</option><option value="sat">Saturday</option><option value="sun">Sunday</option></select></div><div class="form-group"><label for="taskDeadlineInput">Due date</label><input id="taskDeadlineInput" type="date"></div></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeTaskModal()">Cancel</button><button type="submit" class="btn btn-primary">Save task</button></div>
+    </form>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
