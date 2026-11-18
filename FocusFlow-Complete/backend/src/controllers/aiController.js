@@ -145,7 +145,7 @@ Keep answers concise, usually 3-5 sentences.
 
     return res.json({ reply });
   } catch (error) {
-    console.error('AI Assistant error:', error.message);
+    console.error('AI Assistant error details:', error);
 
     const status = Number(
       error.status || error.code || error.response?.status

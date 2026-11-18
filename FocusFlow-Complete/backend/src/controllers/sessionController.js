@@ -88,10 +88,11 @@ console.log("Sessions:", sessions);
     );
 
     res.json({
-      completedSessions: sessions.length,
-      totalFocusedHours: Number((totalSeconds / 3600).toFixed(1)),
-      recentSessions: sessions.slice(0, 10),
-    });
+  completedSessions: sessions.length,
+  totalFocusedHours: Number((totalSeconds / 3600).toFixed(1)),
+  recentSessions: sessions.slice(0, 10),
+  sessions
+});
   } catch (error) {
     res.status(500).json({
       message: 'Failed to fetch session stats',

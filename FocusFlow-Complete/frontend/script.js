@@ -73,16 +73,35 @@ const API_BASE_URL = "http://localhost:5000/api";
 
 // Backend API helper
 async function apiRequest(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${authToken}`,
-      ...(options.headers || {})
-    }
-  });
+  let response;
 
-  const data = await response.json().catch(() => null);
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+        ...(options.headers || {})
+      }
+    });
+  } catch (error) {
+    console.error(`Network error while requesting ${path}:`, error);
+    throw new Error(
+      `Cannot connect to the FocusFlow backend at ${API_BASE_URL}. Make sure the backend is running. (${error.message})`
+    );
+  }
+
+  const responseText = await response.text();
+  let data = null;
+
+  if (responseText) {
+    try {
+      data = JSON.parse(responseText);
+    } catch (error) {
+      console.error(`Invalid JSON response from ${path}:`, responseText);
+      throw new Error(`The backend returned an invalid response (${response.status}).`);
+    }
+  }
 
   if (response.status === 401) {
     localStorage.removeItem("token");
@@ -92,7 +111,8 @@ async function apiRequest(path, options = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(data?.message || "API request failed");
+    const message = data?.message || data?.error || response.statusText || "API request failed";
+    throw new Error(`${message} (HTTP ${response.status})`);
   }
 
   return data;
@@ -126,6 +146,30 @@ async function loadTasksFromApi() {
   } catch (error) {
     console.error("Failed to load tasks:", error);
     showNotification("Could not load tasks from the database.");
+  }
+}
+// Load study sessions from database
+async function loadSessionsFromApi() {
+  try {
+    const data = await apiRequest("/sessions/stats");
+
+    state.sessions = (data.sessions || []).map(session => ({
+      ...session,
+      durationMinutes: Math.round(
+        Number(session.durationSeconds) / 60
+      ),
+      completedAt: session.createdAt
+    }));
+
+    saveAll();
+
+    console.log(
+      "Study sessions loaded from database:",
+      state.sessions
+    );
+
+  } catch (error) {
+    console.error("Failed to load study sessions:", error);
   }
 }
 
@@ -172,14 +216,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Load tasks before rendering the application.
-  await loadTasksFromApi();
+  // Load tasks and study sessions before rendering.
+await loadTasksFromApi();
+await loadSessionsFromApi();
 
-  syncProfileUI();
-  renderAll();
-  initializeCharts();
-  updateTimerDisplay();
-  renderAssistantMessages();
-  initializeAssistant();
+syncProfileUI();
+renderAll();
+initializeCharts();
+updateTimerDisplay();
+renderAssistantMessages();
+initializeAssistant();
 });
 
 // Save local application data
@@ -575,6 +621,7 @@ function escapeHTML(value) {
     "'": "&#39;"
   }[char]));
 }
+
 // Weekly planner
 function renderPlanner() {
   dayKeys.forEach(day => {
@@ -1030,6 +1077,7 @@ function renderAchievements() {
       </div>
     `).join("");
 }
+
 // Charts
 function initializeCharts() {
   if (typeof Chart === "undefined") {
@@ -1161,42 +1209,26 @@ function initializeCharts() {
   updateCharts();
 }
 
+
 function updateCharts() {
   if (!productivityChart || !subjectChart || !plannedActualChart) return;
 
-  const weeklyMinutes = Array(7).fill(0);
+  // 1. Productivity trend: completed task hours by planned weekday
+  const completedHoursByDay = Array(7).fill(0);
 
-  const weekStart = new Date();
+  state.tasks.forEach(task => {
+    if (task.status !== "completed") return;
 
-  weekStart.setHours(0, 0, 0, 0);
+    const dayIndex = dayKeys.indexOf(task.day);
 
-  weekStart.setDate(
-    weekStart.getDate() - ((weekStart.getDay() + 6) % 7)
-  );
-
-  const subjectTotals = {};
-
-  state.sessions.forEach(session => {
-    const date = new Date(session.completedAt);
-
-    const dayIndex = Math.floor(
-      (
-        new Date(date.getFullYear(), date.getMonth(), date.getDate()) -
-        weekStart
-      ) / 86400000
-    );
-
-    if (dayIndex >= 0 && dayIndex < 7) {
-      weeklyMinutes[dayIndex] += Number(session.durationMinutes) || 0;
+    if (dayIndex >= 0) {
+      completedHoursByDay[dayIndex] += Number(task.duration) || 0;
     }
-
-    subjectTotals[session.subject] =
-      (subjectTotals[session.subject] || 0) +
-      (Number(session.durationMinutes) || 0);
   });
 
+  productivityChart.data.datasets[0].label = "Completed task hours";
   productivityChart.data.datasets[0].data =
-    weeklyMinutes.map(minutes =>
+    completedHoursByDay.map(minutes =>
       Number((minutes / 60).toFixed(2))
     );
 
@@ -1205,10 +1237,21 @@ function updateCharts() {
 
   productivityChart.update();
 
+  // 2. Subject performance: completed tasks per subject
+  const subjectTotals = {};
+
+  state.tasks.forEach(task => {
+    if (task.status !== "completed") return;
+
+    const subject = task.subject || "General";
+
+    subjectTotals[subject] = (subjectTotals[subject] || 0) + 1;
+  });
+
   const subjects = Object.keys(subjectTotals);
 
   subjectChart.data.labels =
-    subjects.length ? subjects : ["No sessions yet"];
+    subjects.length ? subjects : ["No completed tasks"];
 
   subjectChart.data.datasets[0].data =
     subjects.length
@@ -1220,28 +1263,31 @@ function updateCharts() {
       ? ["#1E293B", "#8C735B", "#64748B", "#CBD5E1", "#A8A29E", "#B9A995"]
       : ["#CBD5E1"];
 
+  subjectChart.data.datasets[0].label = "Completed tasks";
   subjectChart.update();
 
+  // 3. Planned vs completed task hours
   const plannedMinutes = state.tasks.reduce(
     (sum, task) => sum + (Number(task.duration) || 0),
     0
   );
 
-  const actualMinutes = state.sessions
-    .filter(session => session.mode === "pomodoro")
+  const completedMinutes = state.tasks
+    .filter(task => task.status === "completed")
     .reduce(
-      (sum, session) =>
-        sum + (Number(session.durationMinutes) || 0),
+      (sum, task) => sum + (Number(task.duration) || 0),
       0
     );
 
   plannedActualChart.data.datasets[0].data = [
     Number((plannedMinutes / 60).toFixed(1)),
-    Number((actualMinutes / 60).toFixed(1))
+    Number((completedMinutes / 60).toFixed(1))
   ];
 
+  plannedActualChart.data.datasets[0].label = "Task hours";
   plannedActualChart.update();
 }
+
 
 // Theme
 function toggleTheme() {
@@ -1356,7 +1402,6 @@ async function initializeAssistant() {
   try {
     const history = await apiRequest("/ai/history");
 
-
     if (Array.isArray(history) && history.length) {
       assistantMessages = history.map(item => ({
         sender: item.sender === "user" ? "user" : "bot",
@@ -1369,6 +1414,7 @@ async function initializeAssistant() {
 
     setAssistantConnection(true, "Backend connected");
   } catch (error) {
+    console.error("AI history request failed:", error);
     setAssistantConnection(false, "Local demo mode");
   }
 }
@@ -1561,6 +1607,8 @@ async function sendAssistantMessage(event) {
 
     setAssistantConnection(true, "Backend connected");
   } catch (error) {
+    console.error("AI chat request failed:", error);
+
     assistantMessages.push({
       sender: "bot",
       message: localAssistantReply(message)
@@ -1587,6 +1635,7 @@ function useAssistantPrompt(prompt) {
   input.value = prompt;
   form.requestSubmit();
 }
+
 function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
