@@ -27,6 +27,12 @@ app.get('/health', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`FocusFlow Backend running at http://localhost:${PORT}`);
-});
+// Local development
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`FocusFlow Backend running at http://localhost:${PORT}`);
+  });
+}
+
+// Export Express app for Vercel
+module.exports = app;
