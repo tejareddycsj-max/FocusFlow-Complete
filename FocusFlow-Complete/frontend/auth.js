@@ -1,5 +1,5 @@
 
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = 'https://focus-flow-complete.vercel.app/api/auth';
 
 // If already logged in, go to the dashboard.
 if (localStorage.getItem('token')) {
